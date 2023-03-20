@@ -4,7 +4,6 @@ CMD=$1
 NETWORK=$2
 NODE=
 CHAIN_ID=
-FLAGS=
 
 TAG=$3
 if [ -z "$TAG" ]; then
@@ -33,28 +32,36 @@ case $NETWORK in
     ;;
 esac
 
+FLAGS="\
+  --gas auto --gas-adjustment 1.5 --broadcast-mode block -o json -y \
+  --node $NODE --gas-prices 0.025$DENOM --chain-id $CHAIN_ID"
 
-transfer-ownership() {
+execute() {
   sender=$1
-  msg='{"transfer_ownership":{}}'
-  flags="\
-  --node $NODE \
-  --gas-prices 0.025$DENOM \
-  --chain-id $CHAIN_ID \
-  --from $sender \
-  --gas auto \
-  --gas-adjustment 1.5 \
-  --broadcast-mode block \
-  --output json \
-  -y \
-  "
+  msg=$2
+  flags="$FLAGS --from $sender"
   echo junod tx wasm execute $CONTRACT_ADDR "$msg" "$flags"
   response=$(junod tx wasm execute "$CONTRACT_ADDR" "$msg" $flags)
   echo $response | ./bin/utils/base64-decode-attributes | jq
 }
 
 
-query-select() {
+configure-token-parameters() {
+  sender=$1
+  params_json_obj=$2
+  msg='{"configure":{"params":['$params_json_obj']}}'
+  execute $sender $msg
+}
+
+transfer() {
+  sender=$1
+  recipient=$2
+  amount=$3
+  msg='{"transfer":{"recipient":"'$recipient'","tokens":[{"amount":"'$amount'","token":{"native":{"denom":"ujunox"}}}]}}'
+  execute $sender $msg
+}
+
+select-all() {
   query='{"select":{"fields":null}}'
   flags="--chain-id $CHAIN_ID --output json --node $NODE"
   echo junod query wasm contract-state smart $CONTRACT_ADDR "$query" $flags
@@ -66,11 +73,14 @@ set -e
 echo "executing $CMD for $CONTRACT_ADDR"
 
 case $CMD in
-  transfer-ownership)
-    transfer-ownership $1
+  transfer)
+    transfer $1 $2 $3
     ;;
-  query-select) 
-    query-select
+  configure)
+    configure-token-parameters $1 $2
+    ;;
+  select) 
+    select-all
     ;;
   *)
     echo "unrecognized option: $CMD" >&2

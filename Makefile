@@ -1,7 +1,7 @@
 network 				?= devnet  # network := devnet|mainnet|testnet
 sender 					?= juno16g2rahf5846rxzp3fwlswy08fz8ccuwk03k57y
 build_dir 				?= ./builds
-wasm_filename 			?= cw_contract.wasm
+wasm_filename 			?= cw_faucet.wasm
 
 # build optimized WASM artifact
 build:
@@ -13,7 +13,7 @@ deploy:
 
 # instantiate last contract to be deployed using code ID in release dir code-id file
 instantiate:
-	./bin/instantiate $(network) $(sender) $(tag)
+	./bin/instantiate $(network) $(sender) $(tag) '{"acl_address":"$(acl)","params":[{"token":{"native":{"denom":"ujunox"}},"interval":"300"}]}'
 
 # run all unit tests
 test:
@@ -27,8 +27,8 @@ schemas:
 devnet:
 	./bin/devnet
 
-transfer-ownership:
-	./client.sh transfer-ownership $(network) $(tag) $(sender)
+transfer:
+	./client.sh transfer $(network) $(tag) $(sender) $(recipient) $(amount)
 
 select:
-	./client.sh query-select $(network) $(tag)
+	./client.sh select $(network) $(tag)

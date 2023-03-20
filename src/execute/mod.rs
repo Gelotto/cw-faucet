@@ -1,3 +1,5 @@
-mod transfer_ownership;
+mod configure;
+mod transfer;
 
-pub use transfer_ownership::transfer_ownership;
+pub use configure::configure;
+pub use transfer::transfer;

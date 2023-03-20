@@ -1,24 +1,50 @@
-use crate::error::ContractError;
+use crate::models::{FaucetResult, TransferHistory};
 use crate::msg::InstantiateMsg;
-use cosmwasm_std::{Addr, DepsMut, Env, MessageInfo, StdResult, Storage};
-use cw_storage_plus::Item;
+use crate::{error::ContractError, models::TokenParams};
+use cosmwasm_std::{Addr, Deps, DepsMut, Env, MessageInfo, Uint64};
+use cw_acl::client::Acl;
+use cw_lib::models::TokenID;
+use cw_storage_plus::{Item, Map};
 
-pub const OWNER: Item<Addr> = Item::new("owner");
+pub const ACL_ADDRESS: Item<Addr> = Item::new("acl_address");
+pub const PARAMS: Map<TokenID, TokenParams> = Map::new("params");
+pub const HISTORY: Map<Addr, TransferHistory> = Map::new("history");
 
 /// Initialize contract state data.
 pub fn initialize(
   deps: DepsMut,
   _env: &Env,
-  info: &MessageInfo,
-  _msg: &InstantiateMsg,
+  _info: &MessageInfo,
+  msg: &InstantiateMsg,
 ) -> Result<(), ContractError> {
-  OWNER.save(deps.storage, &info.sender)?;
+  ACL_ADDRESS.save(deps.storage, &msg.acl_address)?;
+  if let Some(params) = &msg.params {
+    for params in params.iter() {
+      PARAMS.save(
+        deps.storage,
+        params.token.get_id(),
+        &TokenParams {
+          token: params.token.clone(),
+          interval: params.interval.max(Uint64::from(60u64)),
+        },
+      )?;
+    }
+  }
   Ok(())
 }
 
-pub fn is_owner(
-  storage: &dyn Storage,
-  addr: &Addr,
-) -> StdResult<bool> {
-  return Ok(OWNER.load(storage)? == *addr);
+/// Helper function that returns true if given wallet (principal) is authorized
+/// by ACL to the given action.
+pub fn is_allowed(
+  deps: &Deps,
+  principal: &Addr,
+  action: &str,
+) -> FaucetResult<bool> {
+  if let Some(acl_addr) = ACL_ADDRESS.may_load(deps.storage)? {
+    let acl = Acl::new(&acl_addr);
+    Ok(acl.is_allowed(&deps.querier, principal, action)?)
+  } else {
+    // NOTE: No ACL implies that everything is 100% open to anyone
+    Ok(true)
+  }
 }

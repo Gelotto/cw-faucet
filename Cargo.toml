@@ -1,9 +1,9 @@
 [package]
-name = "cw-contract"
+name = "cw-faucet"
 version = "0.0.1"
 authors = []
 edition = "2018"
-description = "Smart Contract"
+description = "Faucet CosmWasm Smart Contract"
 license = "Apache-2.0"
 repository = ""
 homepage = ""
@@ -37,6 +37,9 @@ cosmwasm-std = { version = "1.2.1" }
 schemars = "0.8.1"
 serde = { version = "1.0.152", default-features = false, features = ["derive"] }
 thiserror = { version = "1.0.38" }
+cw-lib = { version = "0.1.0", path = "../cw-lib" }
+cw-acl = { version = "0.0.1", path = "../cw-acl", features = ["library"] }
+cw_repository = { version = "0.0.3", path = "../cw-repository", features = ["library"] }
 
 [dev-dependencies]
 cw-multi-test = { version = "0.16.2" }

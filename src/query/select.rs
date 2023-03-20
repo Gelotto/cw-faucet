@@ -1,21 +1,30 @@
-use crate::{msg::SelectResponse, state::OWNER};
-use cosmwasm_std::{Deps, StdResult};
+use crate::{
+  msg::SelectResponse,
+  state::{HISTORY, PARAMS},
+};
+use cosmwasm_std::{Addr, Deps, Order, StdResult};
+use cw_repository::client::Repository;
 
 pub fn select(
   deps: Deps,
-  fields: Option<Vec<String>>,
+  maybe_fields: Option<Vec<String>>,
+  maybe_wallet: Option<Addr>,
 ) -> StdResult<SelectResponse> {
-  if let Some(fields) = fields {
-    Ok(SelectResponse {
-      owner: if fields.contains(&"owner".to_owned()) {
-        OWNER.may_load(deps.storage)?
-      } else {
-        None
-      },
-    })
-  } else {
-    Ok(SelectResponse {
-      owner: OWNER.may_load(deps.storage)?,
-    })
-  }
+  let loader = Repository::loader(deps.storage, &maybe_fields);
+  Ok(SelectResponse {
+    last_transfer: loader.view_by_wallet("last_transfer", maybe_wallet, |addr| {
+      HISTORY.may_load(deps.storage, addr.clone())
+    })?,
+    params: loader.view("params", || {
+      Ok(Some(
+        PARAMS
+          .range(deps.storage, None, None, Order::Ascending)
+          .map(|result| {
+            let (_, v) = result.unwrap();
+            v
+          })
+          .collect(),
+      ))
+    })?,
+  })
 }
