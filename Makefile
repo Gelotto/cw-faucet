@@ -13,6 +13,9 @@ deploy:
 
 # instantiate last contract to be deployed using code ID in release dir code-id file
 instantiate:
+	./bin/instantiate $(network) $(sender) $(tag) '{"acl_address":"$(acl)"}'
+
+instantiate-dev:
 	./bin/instantiate $(network) $(sender) $(tag) '{"acl_address":"$(acl)","params":[{"token":{"native":{"denom":"ujunox"}},"interval":"300"}]}'
 
 # run all unit tests
@@ -29,6 +32,9 @@ devnet:
 
 transfer:
 	./client.sh transfer $(network) $(tag) $(sender) $(recipient) $(amount)
+
+configure:
+	./client.sh configure $(network) $(tag) $(sender) $(interval)
 
 select:
 	./client.sh select $(network) $(tag)

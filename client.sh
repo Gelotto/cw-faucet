@@ -21,7 +21,7 @@ case $NETWORK in
     DENOM=ujunox
     ;;
   mainnet)
-    NODE="https://rpc-juno.itastakers.com",
+    NODE="https://rpc-juno.itastakers.com:443"
     CHAIN_ID=juno-1
     DENOM=ujuno
     ;;
@@ -46,10 +46,10 @@ execute() {
 }
 
 
-configure-token-parameters() {
+configure() {
   sender=$1
-  params_json_obj=$2
-  msg='{"configure":{"params":['$params_json_obj']}}'
+  interval=$2
+  msg='{"configure":{"params":[{"interval":"'$interval'","token":{"native":{"denom":"ujuno"}}}]}}'
   execute $sender $msg
 }
 
@@ -77,7 +77,7 @@ case $CMD in
     transfer $1 $2 $3
     ;;
   configure)
-    configure-token-parameters $1 $2
+    configure $1 $2
     ;;
   select) 
     select-all

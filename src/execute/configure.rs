@@ -17,5 +17,5 @@ pub fn configure(
   for params in params_list.iter() {
     PARAMS.save(deps.storage, params.token.get_id(), &params)?;
   }
-  Ok(Response::new().add_attributes(vec![attr("action", "set_allowance")]))
+  Ok(Response::new().add_attributes(vec![attr("action", "configure")]))
 }
