@@ -49,7 +49,7 @@ execute() {
 configure() {
   sender=$1
   interval=$2
-  msg='{"configure":{"params":[{"interval":"'$interval'","token":{"native":{"denom":"ujuno"}}}]}}'
+  msg='{"configure":{"params":[{"interval":"'$interval'","token":{"native":{"denom":"'$DENOM'"}}}]}}'
   execute $sender $msg
 }
 
@@ -57,12 +57,13 @@ transfer() {
   sender=$1
   recipient=$2
   amount=$3
-  msg='{"transfer":{"recipient":"'$recipient'","tokens":[{"amount":"'$amount'","token":{"native":{"denom":"ujunox"}}}]}}'
+  msg='{"transfer":{"recipient":"'$recipient'","tokens":[{"amount":"'$amount'","token":{"native":{"denom":"'$DENOM'"}}}]}}'
   execute $sender $msg
 }
 
 select-all() {
-  query='{"select":{"fields":null}}'
+  sender=$1
+  query='{"select":{"fields":null,"wallet":"'$sender'"}}'
   flags="--chain-id $CHAIN_ID --output json --node $NODE"
   echo junod query wasm contract-state smart $CONTRACT_ADDR "$query" $flags
   response=$(junod query wasm contract-state smart $CONTRACT_ADDR "$query" $flags)
@@ -80,7 +81,7 @@ case $CMD in
     configure $1 $2
     ;;
   select) 
-    select-all
+    select-all $1
     ;;
   *)
     echo "unrecognized option: $CMD" >&2

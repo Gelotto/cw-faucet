@@ -1,5 +1,5 @@
 use cosmwasm_schema::cw_serde;
-use cosmwasm_std::{Timestamp, Uint64};
+use cosmwasm_std::{Timestamp, Uint128, Uint64};
 use cw_lib::models::{Token, TokenAmount};
 
 use crate::error::ContractError;
@@ -13,7 +13,14 @@ pub struct TokenParams {
 }
 
 #[cw_serde]
-pub struct TransferHistory {
+pub struct WalletTransfer {
   pub token_amount: TokenAmount,
   pub last_transferred_at: Timestamp,
+}
+
+#[cw_serde]
+pub struct TransferTotal {
+  pub token: Token,
+  pub amount: Uint128,
+  pub count: Uint64,
 }

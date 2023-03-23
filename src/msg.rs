@@ -1,8 +1,8 @@
 use cosmwasm_schema::cw_serde;
-use cosmwasm_std::Addr;
-use cw_lib::models::TokenAmount;
+use cosmwasm_std::{Addr, Uint128};
+use cw_lib::models::{Token, TokenAmount};
 
-use crate::models::{TokenParams, TransferHistory};
+use crate::models::{TokenParams, TransferTotal, WalletTransfer};
 
 #[cw_serde]
 pub struct InstantiateMsg {
@@ -23,6 +23,11 @@ pub enum ExecuteMsg {
 
 #[cw_serde]
 pub enum QueryMsg {
+  CanRequest {
+    address: Addr,
+    token: Token,
+    amount: Uint128,
+  },
   Select {
     fields: Option<Vec<String>>,
     wallet: Option<Addr>,
@@ -34,6 +39,13 @@ pub struct MigrateMsg {}
 
 #[cw_serde]
 pub struct SelectResponse {
-  pub params: Option<Vec<TokenParams>>,
-  pub last_transfer: Option<TransferHistory>,
+  pub token_params: Option<Vec<TokenParams>>,
+  pub transfer_totals: Option<Vec<TransferTotal>>,
+  pub my_last_transfer: Option<WalletTransfer>,
+}
+
+#[cw_serde]
+pub struct CanRequestResponse {
+  pub can_request: bool,
+  pub reason: Option<String>,
 }

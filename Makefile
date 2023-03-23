@@ -37,4 +37,4 @@ configure:
 	./client.sh configure $(network) $(tag) $(sender) $(interval)
 
 select:
-	./client.sh select $(network) $(tag)
+	./client.sh select $(network) $(tag) $(sender)

@@ -32,20 +32,21 @@ pub fn execute(
 ) -> Result<Response, ContractError> {
   match msg {
     ExecuteMsg::Configure { params } => execute::configure(deps, env, info, &params),
-    ExecuteMsg::Transfer { recipient, tokens } => {
-      execute::transfer(deps, env, info, recipient, &tokens)
-    },
+    ExecuteMsg::Transfer { recipient, tokens } => execute::transfer(deps, env, info, recipient, &tokens),
   }
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn query(
   deps: Deps,
-  _env: Env,
+  env: Env,
   msg: QueryMsg,
 ) -> StdResult<Binary> {
   let result = match msg {
     QueryMsg::Select { fields, wallet } => to_binary(&query::select(deps, fields, wallet)?),
+    QueryMsg::CanRequest { address, token, amount } => {
+      to_binary(&query::can_request(deps, env, address, token, amount)?)
+    },
   }?;
   Ok(result)
 }

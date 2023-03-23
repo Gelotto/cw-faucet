@@ -1,6 +1,6 @@
 [package]
 name = "cw-faucet"
-version = "0.0.1"
+version = "0.0.3"
 authors = []
 edition = "2018"
 description = "Faucet CosmWasm Smart Contract"

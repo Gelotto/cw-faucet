@@ -1,4 +1,4 @@
-use crate::models::{FaucetResult, TransferHistory};
+use crate::models::{FaucetResult, TransferTotal, WalletTransfer};
 use crate::msg::InstantiateMsg;
 use crate::{error::ContractError, models::TokenParams};
 use cosmwasm_std::{Addr, Deps, DepsMut, Env, MessageInfo, Uint64};
@@ -7,8 +7,9 @@ use cw_lib::models::TokenID;
 use cw_storage_plus::{Item, Map};
 
 pub const ACL_ADDRESS: Item<Addr> = Item::new("acl_address");
-pub const PARAMS: Map<TokenID, TokenParams> = Map::new("params");
-pub const HISTORY: Map<Addr, TransferHistory> = Map::new("history");
+pub const TOKEN_PARAMS: Map<TokenID, TokenParams> = Map::new("token_params");
+pub const WALLET_TRANSFERS: Map<Addr, WalletTransfer> = Map::new("wallet_transfers");
+pub const TRANSFER_TOTALS: Map<TokenID, TransferTotal> = Map::new("transfer_totals");
 
 /// Initialize contract state data.
 pub fn initialize(
@@ -20,7 +21,7 @@ pub fn initialize(
   ACL_ADDRESS.save(deps.storage, &msg.acl_address)?;
   if let Some(params) = &msg.params {
     for params in params.iter() {
-      PARAMS.save(
+      TOKEN_PARAMS.save(
         deps.storage,
         params.token.get_id(),
         &TokenParams {
